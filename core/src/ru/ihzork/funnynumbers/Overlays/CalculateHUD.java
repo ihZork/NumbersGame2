@@ -72,7 +72,7 @@ public class CalculateHUD {
                 {
                     particle.draw(batch,particle.life);
                 }
-                Gdx.app.log(TAG, particle.getLabelText()+" "+particle.getLife()+" "+ particle.getX() + " " +particle.getY());
+                //Gdx.app.log(TAG, particle.getLabelText()+" "+particle.getLife()+" "+ particle.getX() + " " +particle.getY());
             } else {
                 particles.removeIndex(i);
                 freeParticles.free(particle);
@@ -89,7 +89,7 @@ public class CalculateHUD {
         Particle particle = freeParticles.obtain();
         particle.setup(startPosition,5f,text,color);
 
-        Gdx.app.log(TAG, particle.getLabelText()+" "+particle.getLife()+" "+ startPosition);
+        //Gdx.app.log(TAG, particle.getLabelText()+" "+particle.getLife()+" "+ startPosition);
         particles.add(particle);
     }
     private void updateParticle(Particle particle) {

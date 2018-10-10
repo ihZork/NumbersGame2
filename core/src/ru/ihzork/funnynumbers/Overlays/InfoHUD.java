@@ -52,10 +52,11 @@ public class InfoHUD {
     private float hudHeight,buttonsHeight;
     private ImageButton pause;
     //ArrayList<Image> numb = new ArrayList<Image>(9);
+    DialogOverlay dialogOverlay;
 
-
-    public InfoHUD(final GameplayScreen screen) {
+    public InfoHUD(final GameplayScreen screen, final DialogOverlay dialogOverlay) {
         this.screen = screen;
+        this.dialogOverlay = dialogOverlay;
         this.viewport = new ExtendViewport(Constants.HUD_VIEWPORT_SIZE, Constants.HUD_VIEWPORT_SIZE);
         font = Utils.generateFreeTypeFont(Constants.FONT_UBUNTU, 24, Color.WHITE);
         skin = new Skin();
@@ -100,6 +101,16 @@ public class InfoHUD {
         imagePause.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+
+
+                dialogOverlay.getWindow().clearActions();
+                dialogOverlay.action.reset();
+                dialogOverlay.getWindow().removeAction(dialogOverlay.action);
+                dialogOverlay.getWindow().setPosition(dialogOverlay.getStartPosition().x,dialogOverlay.getStartPosition().y);
+                dialogOverlay.action.setDuration(0.2f);
+                dialogOverlay.getWindow().addAction(dialogOverlay.action);
+
+
                 Gdx.app.log("SNAKE HUD", event+"PAUSE BUTTON CLICKED");
                 screen.setGameState(Enums.GAME_STATE.PAUSE);
                 screen.isPaused=true;

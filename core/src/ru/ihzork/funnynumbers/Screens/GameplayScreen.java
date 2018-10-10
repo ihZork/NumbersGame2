@@ -17,6 +17,7 @@ import ru.ihzork.funnynumbers.GameUtils.Enums.Difficulty;
 import ru.ihzork.funnynumbers.GameUtils.ScreenManager;
 import ru.ihzork.funnynumbers.Level;
 import ru.ihzork.funnynumbers.Overlays.CalculateHUD;
+import ru.ihzork.funnynumbers.Overlays.DialogOverlay;
 import ru.ihzork.funnynumbers.Overlays.InfoHUD;
 import ru.ihzork.funnynumbers.Overlays.PauseOverlay;
 import ru.ihzork.funnynumbers.Overlays.PlayerHUD;
@@ -39,8 +40,8 @@ public class GameplayScreen  extends AbstractScreen {
     private InfoHUD infoHUD;
     private PlayerHUD playerHUD;
     public CalculateHUD calculateHUD;
-    PauseOverlay pauseOverlay;
-
+    //PauseOverlay pauseOverlay;
+    DialogOverlay dialogOverlay;
     private ShapeRenderer shapeRenderer;
     private boolean isFirstTime;
     public boolean isPaused;
@@ -48,15 +49,17 @@ public class GameplayScreen  extends AbstractScreen {
     float drawInfosTime;
     float drawSelectorTime;
     private TouchControls controls;
+    float pauseTime=3f,alpha;
+    boolean show = false;
     //Countdown countdown;
 
     public GameplayScreen(Difficulty difficulty) {
         super();
         this.difficulty = difficulty;
         level = new Level(this, difficulty);
+        batch = new SpriteBatch();
 
 
-        infoHUD = new InfoHUD(this);
         playerHUD = new PlayerHUD(this);
 
 
@@ -66,8 +69,11 @@ public class GameplayScreen  extends AbstractScreen {
         calculateHUD = new CalculateHUD(this,deadLine);
 
         //this.countdown = new Countdown(infoHUD.getTimeLabel());
-        batch = new SpriteBatch();
-        pauseOverlay = new PauseOverlay(this,batch);
+
+        //pauseOverlay = new PauseOverlay(this,batch);
+        dialogOverlay = new DialogOverlay(this,batch,"Pause");
+        infoHUD = new InfoHUD(this,dialogOverlay);
+
         controls = new TouchControls(level,playerHUD);
         isPaused = false;
 
@@ -112,6 +118,23 @@ public class GameplayScreen  extends AbstractScreen {
                 break;
             case RUN:
                 //countdown.update();
+                /*if(dialogOverlay.getWindow().getActions().contains(dialogOverlay.moveToOrigin,true)) {
+                    // this is "A" currently running action, do nothing
+                    // If you wanted you could restart the action which
+                    // would cause the duration to start over, like so:
+                   // dialogOverlay.moveToOrigin.reset();
+
+                    // This action will now have a 2 second tween between
+                    // its current location and target
+                }
+                else {
+                    dialogOverlay.moveToOrigin.reset();
+                    //dialogOverlay.getWindow().addAction(dialogOverlay.moveToOrigin);
+                }
+
+                dialogOverlay.stage.act();
+                dialogOverlay.stage.draw();*/
+
 
                 drawInfosTime += delta;
 
@@ -150,7 +173,9 @@ public class GameplayScreen  extends AbstractScreen {
                 shapeRenderer.setColor(new Color(0, 1, 0, 1f));
                 shapeRenderer.line(0, infoHUD.viewport.getWorldHeight()-startLine, getWidth(), infoHUD.viewport.getWorldHeight()-startLine);
                 shapeRenderer.end();
-
+                //pauseOverlay.disableButton();
+                dialogOverlay.disableButton();
+                //dialogOverlay.reset();
                 break;
             case PAUSE:
                 //isPaused=true;
@@ -181,15 +206,102 @@ public class GameplayScreen  extends AbstractScreen {
                 shapeRenderer.end();
                 Gdx.gl.glDisable(GL20.GL_BLEND);
 
-                pauseOverlay.enableButton();
-                pauseOverlay.stage.draw();
+                //pauseOverlay.enableButton();
+
+                dialogOverlay.enableButton();
+
+               ///pauseOverlay.stage.draw();
+                if(dialogOverlay.getWindow().getActions().contains(dialogOverlay.action,true)) {
+                    dialogOverlay.stage.act();
+                    //dialogOverlay.stage.draw();
+                }
+
+
+
+                dialogOverlay.stage.draw();
+
+
+
+
+               // dialogOverlay.stage.act();
+
+
+                //dialogOverlay.reset();
 
                 //pauseKeyPressed();
                 break;
+            case RETURNTOGAME:
+                infoHUD.stage.draw();
+                playerHUD.render(batch);
+                level.render(batch);
+
+                // Blend transparent rectangle for fade out effect
+                Gdx.graphics.getGL20().glEnable(GL20.GL_BLEND);
+                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+                //shapeRenderer.setProjectionMatrix(infoHUD.stage.getCamera().combined);
+                /*shapeRenderer.begin(ShapeType.Line);
+                shapeRenderer.setColor(new Color(0, 1, 0, 1f));
+                shapeRenderer.line(0, infoHUD.viewport.getWorldHeight()-startLine, getWidth(), infoHUD.viewport.getWorldHeight()-startLine);
+                shapeRenderer.end();*/
+
+                shapeRenderer.setProjectionMatrix(playerHUD.viewport.getCamera().combined);
+
+
+                shapeRenderer.begin(ShapeType.Filled);
+                shapeRenderer.setColor(new Color(Constants.BACKGROUND_COLOR.r,Constants.BACKGROUND_COLOR.g,Constants.BACKGROUND_COLOR.b,0.8f));
+                shapeRenderer.rect(0, 0, getWidth(), getHeight());
+
+
+                shapeRenderer.setColor(new Color(Constants.BACKGROUND_COLOR));
+                shapeRenderer.rect(0, playerHUD.getDeadLine()+5, getWidth(), playerHUD.getDeadLine()+infoHUD.viewport.getWorldHeight());
+                shapeRenderer.end();
+                Gdx.gl.glDisable(GL20.GL_BLEND);
+
+                dialogOverlay.stage.act();
+                if (dialogOverlay.getWindow().getActions().size < 1)
+                {
+                    setGameState(Enums.GAME_STATE.RUN);
+                    isPaused = false;
+
+                }
+
+                dialogOverlay.stage.draw();
+
+
+
+
+
+                break;
+            case SHOWSCORE:
+                Gdx.graphics.getGL20().glEnable(GL20.GL_BLEND);
+                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+
+                //shapeRenderer.setProjectionMatrix(playerHUD.viewport.getCamera().combined);
+
+
+                shapeRenderer.begin(ShapeType.Filled);
+                shapeRenderer.setColor(new Color(Constants.BACKGROUND_COLOR.r,Constants.BACKGROUND_COLOR.g,Constants.BACKGROUND_COLOR.b,0.8f));
+                shapeRenderer.rect(0, 0, getWidth(), getHeight());
+
+
+
+                shapeRenderer.end();
+                Gdx.gl.glDisable(GL20.GL_BLEND);
+
+                break;
             case STOP:
+                infoHUD.stage.draw();
+                playerHUD.render(batch);
+                level.render(batch);
                 //countdown.cancel();
-                level.resetGame();
-                ScreenManager.getInstance().showScreen(Enums.Screen.RESTART_SCREEN, difficulty);
+               // setGameState(Enums.GAME_STATE.SHOWSCORE);
+                alpha = Math.min(0.06f, Gdx.graphics.getDeltaTime());
+                pauseTime-=alpha;
+                if(pauseTime<1) {
+
+                    setDone();
+                }
 
                 break;
             case CANCEL:
@@ -200,13 +312,22 @@ public class GameplayScreen  extends AbstractScreen {
                 break;
         }
     }
+    public void startDialogAction(boolean show)
+    {
+        this.show = show;
+
+
+
+
+
+    }
 
     @Override
     public void show() {
         super.show();
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(infoHUD.getStage());
-        multiplexer.addProcessor(pauseOverlay.stage);
+        multiplexer.addProcessor(dialogOverlay.stage);
         multiplexer.addProcessor(controls);
 
         Gdx.input.setInputProcessor(multiplexer);
@@ -229,13 +350,18 @@ public class GameplayScreen  extends AbstractScreen {
 
     }
 
+    public void setDone()
+    {
+        level.resetGame();
+        ScreenManager.getInstance().showScreen(Enums.Screen.RESTART_SCREEN, difficulty);
+    }
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
         level.viewport.update(width, height, true);
         infoHUD.viewport.update(width, height, true);
         playerHUD.viewport.update(width, height, true);
-        pauseOverlay.viewport.update(width, height, true);
+        dialogOverlay.viewport.update(width, height, true);
     }
 
     @Override

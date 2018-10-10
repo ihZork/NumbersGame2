@@ -12,8 +12,10 @@ public class Enums {
     public enum GAME_STATE {
         RUN,
         PAUSE,
+        RETURNTOGAME,
         FIRST,
         STOP,
+        SHOWSCORE,
         CANCEL
     }
     public enum Difficulty {
