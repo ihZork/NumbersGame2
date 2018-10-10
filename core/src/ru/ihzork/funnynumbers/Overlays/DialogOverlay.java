@@ -80,14 +80,9 @@ public class DialogOverlay {
                 moveToOrigin.setDuration(0.2f);
                 window.addAction(moveToOrigin);
 
-                //screen.startDialogAction(true);
 
 
                     screen.setGameState(Enums.GAME_STATE.RETURNTOGAME);
-                    //screen.isPaused = false;
-
-
-
 
                 Gdx.app.log("PAUSE OVERLAY", "RESUME BUTTON CLICKED");
                 event.stop();
